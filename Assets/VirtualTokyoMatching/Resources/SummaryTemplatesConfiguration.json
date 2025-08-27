@@ -1,0 +1,188 @@
+{
+  "config_version": "1.0",
+  "description": "Personality summary generation templates for Virtual Tokyo Matching",
+  
+  "generation_settings": {
+    "significance_threshold": 0.3,
+    "max_tags_per_profile": 3,
+    "max_sentences_in_summary": 2,
+    "min_confidence_for_tag": 0.4,
+    "language": "japanese"
+  },
+  
+  "axis_templates": [
+    {
+      "axis_name": "外向性",
+      "axis_index": 0,
+      "positive_description": "社交的で人との関わりを大切にされます",
+      "positive_tags": ["社交的", "外向的", "人懐っこい"],
+      "negative_description": "内省的で静かな環境を好まれます",
+      "negative_tags": ["内向的", "思慮深い", "集中型"],
+      "neutral_description": "状況に応じて社交的にも内省的にも振る舞われます",
+      "neutral_tags": ["バランス型", "適応型", "状況対応"]
+    },
+    {
+      "axis_name": "創造性", 
+      "axis_index": 1,
+      "positive_description": "創造的で新しいアイデアを生み出すことを得意とされます",
+      "positive_tags": ["創造的", "アイデア豊富", "革新的"],
+      "negative_description": "実用性を重視し確実な方法を選ばれます",
+      "negative_tags": ["実用的", "現実的", "堅実"],
+      "neutral_description": "創造性と実用性のバランスを取られます",
+      "neutral_tags": ["バランス型", "実用創造", "柔軟"]
+    },
+    {
+      "axis_name": "協調性",
+      "axis_index": 2,
+      "positive_description": "チームワークを重視し他者との協力を大切にされます",
+      "positive_tags": ["協調的", "チームワーク", "協力的"],
+      "negative_description": "独立性を重視し個人での作業を好まれます",
+      "negative_tags": ["独立志向", "個人主義", "自立型"],
+      "neutral_description": "状況に応じて協力と独立を使い分けられます",
+      "neutral_tags": ["柔軟", "状況対応", "バランス型"]
+    },
+    {
+      "axis_name": "論理性",
+      "axis_index": 3,
+      "positive_description": "論理的思考を重視し分析的にアプローチされます",
+      "positive_tags": ["論理的", "分析的", "理性的"],
+      "negative_description": "直感や感情を大切にし人間的なアプローチを好まれます",
+      "negative_tags": ["直感的", "感情重視", "人間的"],
+      "neutral_description": "論理と感情のバランスを取られます",
+      "neutral_tags": ["バランス型", "総合判断", "柔軟"]
+    },
+    {
+      "axis_name": "感情表現",
+      "axis_index": 4,
+      "positive_description": "感情豊かで表現力に優れた方です",
+      "positive_tags": ["感情豊か", "表現力豊富", "情熱的"],
+      "negative_description": "感情をコントロールし冷静に振る舞われます",
+      "negative_tags": ["冷静", "感情制御", "理性的"],
+      "neutral_description": "状況に応じて感情表現を調整されます",
+      "neutral_tags": ["適度", "状況判断", "バランス型"]
+    },
+    {
+      "axis_name": "責任感",
+      "axis_index": 5,
+      "positive_description": "責任感が強く約束を大切にされます",
+      "positive_tags": ["責任感強", "信頼できる", "約束重視"],
+      "negative_description": "自由度を重視し柔軟性を大切にされます",
+      "negative_tags": ["自由重視", "柔軟", "臨機応変"],
+      "neutral_description": "責任と自由のバランスを取られます",
+      "neutral_tags": ["バランス型", "適度", "状況対応"]
+    },
+    {
+      "axis_name": "冒険心",
+      "axis_index": 6,
+      "positive_description": "新しい挑戦を楽しみ冒険心旺盛です",
+      "positive_tags": ["冒険心旺盛", "挑戦好き", "新しもの好き"],
+      "negative_description": "安定性を重視し確実性を大切にされます",
+      "negative_tags": ["安定重視", "慎重", "堅実"],
+      "neutral_description": "安定と挑戦のバランスを取られます",
+      "neutral_tags": ["バランス型", "適度", "計画的"]
+    },
+    {
+      "axis_name": "理想主義",
+      "axis_index": 7,
+      "positive_description": "理想を追求し価値観を大切にされます",
+      "positive_tags": ["理想主義", "価値観重視", "志向性強"],
+      "negative_description": "現実的で実用性を重視されます",
+      "negative_tags": ["現実的", "実用重視", "合理的"],
+      "neutral_description": "理想と現実のバランスを取られます",
+      "neutral_tags": ["バランス型", "実用理想", "柔軟"]
+    },
+    {
+      "axis_name": "社交性",
+      "axis_index": 8,
+      "positive_description": "人との交流を楽しみ社交的な場面を好まれます",
+      "positive_tags": ["社交好き", "人交流", "コミュニケーション"],
+      "negative_description": "少人数での深い関係を大切にされます",
+      "negative_tags": ["少人数好み", "深い関係", "質重視"],
+      "neutral_description": "状況に応じて社交性を発揮されます",
+      "neutral_tags": ["状況対応", "柔軟", "バランス型"]
+    },
+    {
+      "axis_name": "楽観性",
+      "axis_index": 9,
+      "positive_description": "前向きで楽観的な視点を持たれます",
+      "positive_tags": ["楽観的", "前向き", "ポジティブ"],
+      "negative_description": "慎重で現実的な視点を持たれます",
+      "negative_tags": ["慎重", "現実視", "リスク意識"],
+      "neutral_description": "状況に応じて楽観と慎重を使い分けられます",
+      "neutral_tags": ["バランス型", "状況判断", "適度"]
+    }
+  ],
+  
+  "headline_templates": [
+    {
+      "template": "創造的で社交的な方です",
+      "required_axes": [1, 8],
+      "min_confidence": 0.8,
+      "priority": 1
+    },
+    {
+      "template": "協調性を重視する方です",
+      "required_axes": [2],
+      "min_confidence": 0.6,
+      "priority": 2
+    },
+    {
+      "template": "論理的で責任感の強い方です",
+      "required_axes": [3, 5],
+      "min_confidence": 0.7,
+      "priority": 3
+    },
+    {
+      "template": "冒険心旺盛で新しい挑戦を求める方です",
+      "required_axes": [6],
+      "min_confidence": 0.6,
+      "priority": 4
+    },
+    {
+      "template": "バランス感覚に優れた方です",
+      "required_axes": [],
+      "min_confidence": 0.4,
+      "priority": 5
+    },
+    {
+      "template": "新しいつながりを求めています",
+      "required_axes": [],
+      "min_confidence": 0.0,
+      "priority": 10
+    }
+  ],
+  
+  "tag_categories": {
+    "personality": {
+      "social": ["社交的", "外向的", "人懐っこい", "内向的", "思慮深い", "集中型"],
+      "creative": ["創造的", "アイデア豊富", "革新的", "実用的", "現実的", "堅実"],
+      "collaborative": ["協調的", "チームワーク", "協力的", "独立志向", "個人主義", "自立型"],
+      "analytical": ["論理的", "分析的", "理性的", "直感的", "感情重視", "人間的"],
+      "expressive": ["感情豊か", "表現力豊富", "情熱的", "冷静", "感情制御", "理性的"]
+    },
+    "behavioral": {
+      "responsibility": ["責任感強", "信頼できる", "約束重視", "自由重視", "柔軟", "臨機応変"],
+      "adventure": ["冒険心旺盛", "挑戦好き", "新しもの好き", "安定重視", "慎重", "堅実"],
+      "idealism": ["理想主義", "価値観重視", "志向性強", "現実的", "実用重視", "合理的"],
+      "optimism": ["楽観的", "前向き", "ポジティブ", "慎重", "現実視", "リスク意識"]
+    },
+    "balance": {
+      "adaptive": ["バランス型", "適応型", "状況対応", "柔軟", "状況判断", "適度"]
+    }
+  },
+  
+  "summary_rules": {
+    "max_characters": 100,
+    "avoid_repetition": true,
+    "prioritize_strong_traits": true,
+    "include_provisional_note": true,
+    "use_respectful_language": true
+  },
+  
+  "provisional_indicators": {
+    "provisional_suffix": "（暫定）",
+    "completion_threshold": 0.7,
+    "confidence_multiplier": 0.8,
+    "show_progress_in_tags": true
+  }
+}

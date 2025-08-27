@@ -1,0 +1,102 @@
+{
+  "config_version": "1.0",
+  "description": "Vector transformation matrices for Virtual Tokyo Matching personality system",
+  
+  "dimensions": {
+    "input_questions": 112,
+    "vector_30d": 30,
+    "reduced_6d": 6
+  },
+  
+  "axis_names_30d": [
+    "外向性", "創造性", "協調性", "論理性", "感情表現", "責任感", "冒険心", "理想主義", "社交性", "楽観性",
+    "自立性", "献身性", "革新性", "持続力", "表現力", "分析力", "共感性", "積極性", "多様性", "計画性",
+    "直感力", "競争心", "協力性", "自由性", "現実性", "情熱", "慎重さ", "適応力", "伝統重視", "進歩性"
+  ],
+  
+  "axis_names_6d": [
+    "社交性", "創造性", "協調性", "理性", "感情", "行動性"
+  ],
+  
+  "transformation_matrix_112_to_30": {
+    "description": "Weight matrix W for transforming 112 question responses to 30D personality vector",
+    "format": "question_id -> axis_weights",
+    "sample_weights": {
+      "0": {"0": 0.8, "8": 0.6, "17": 0.4},
+      "1": {"1": 0.9, "12": 0.5, "14": 0.3},
+      "2": {"2": 0.8, "16": 0.7, "22": 0.6},
+      "3": {"3": 0.8, "15": 0.7, "19": 0.6},
+      "4": {"4": 0.8, "25": 0.7, "20": 0.5},
+      "5": {"5": 0.8, "13": 0.6, "19": 0.4},
+      "6": {"6": 0.7, "10": 0.6, "21": 0.5},
+      "7": {"7": 0.8, "1": 0.5, "12": 0.4},
+      "8": {"8": 0.8, "0": 0.6, "14": 0.4},
+      "9": {"9": 0.8, "25": 0.5, "6": 0.3}
+    },
+    "note": "Full matrix requires 112 questions × 30 axes with sparse weights (most weights = 0)"
+  },
+  
+  "projection_matrix_30_to_6": {
+    "description": "Projection matrix P for privacy-preserving dimensionality reduction",
+    "format": "30d_axis -> 6d_weights",
+    "matrix": {
+      "social": {
+        "description": "Social dimension combines extraversion, sociability, expressiveness",
+        "weights": {
+          "0": 0.8, "8": 0.7, "14": 0.5, "17": 0.6, "18": 0.4
+        }
+      },
+      "creative": {
+        "description": "Creative dimension combines creativity, innovation, idealism",
+        "weights": {
+          "1": 0.8, "12": 0.7, "7": 0.5, "29": 0.6, "20": 0.4
+        }
+      },
+      "cooperative": {
+        "description": "Cooperative dimension combines cooperation, empathy, collaboration",
+        "weights": {
+          "2": 0.8, "16": 0.7, "22": 0.6, "11": 0.5, "28": -0.3
+        }
+      },
+      "rational": {
+        "description": "Rational dimension combines logic, analysis, planning",
+        "weights": {
+          "3": 0.8, "15": 0.7, "19": 0.6, "26": 0.5, "24": 0.4
+        }
+      },
+      "emotional": {
+        "description": "Emotional dimension combines emotional expression, passion, intuition",
+        "weights": {
+          "4": 0.8, "25": 0.7, "20": 0.5, "16": 0.4, "9": 0.3
+        }
+      },
+      "behavioral": {
+        "description": "Behavioral dimension combines assertiveness, adventure, independence",
+        "weights": {
+          "17": 0.6, "6": 0.7, "10": 0.6, "21": 0.5, "23": 0.4
+        }
+      }
+    }
+  },
+  
+  "normalization_settings": {
+    "input_range": [-2.0, 2.0],
+    "output_range_30d": [-1.0, 1.0],
+    "output_range_6d": [-1.0, 1.0],
+    "epsilon": 0.001
+  },
+  
+  "performance_parameters": {
+    "update_threshold": 0.01,
+    "recalculation_trigger_threshold": 0.05,
+    "min_update_interval": 0.1,
+    "batch_size": 10
+  },
+  
+  "validation": {
+    "check_matrix_dimensions": true,
+    "check_weight_ranges": true,
+    "check_normalization": true,
+    "warn_on_zero_weights": false
+  }
+}

@@ -1,0 +1,113 @@
+{
+  "config_version": "1.0",
+  "description": "Performance optimization settings for Virtual Tokyo Matching VRChat world",
+  
+  "frame_rate_targets": {
+    "target_fps_pc": 72,
+    "target_fps_quest": 60,
+    "minimum_fps_pc": 60,
+    "minimum_fps_quest": 45,
+    "fps_check_interval": 1.0
+  },
+  
+  "calculation_limits": {
+    "max_calculations_per_frame_pc": 10,
+    "max_calculations_per_frame_quest": 5,
+    "max_calculations_per_frame_debug": 3,
+    "incremental_update_interval": 0.5,
+    "full_recalc_cooldown": 2.0
+  },
+  
+  "compatibility_calculation": {
+    "max_full_recalc_time_pc": 5.0,
+    "max_full_recalc_time_quest": 10.0,
+    "max_cached_profiles": 50,
+    "max_recommendations_to_calculate": 10,
+    "recommendations_to_display": 3,
+    "similarity_epsilon": 0.001
+  },
+  
+  "network_optimization": {
+    "sync_data_update_rate": 1.0,
+    "max_sync_updates_per_frame": 3,
+    "profile_broadcast_throttle": 2.0,
+    "late_joiner_data_chunks": 5,
+    "max_sync_variables_per_publisher": 12
+  },
+  
+  "memory_management": {
+    "max_cached_vectors": 30,
+    "vector_cache_cleanup_interval": 10.0,
+    "ui_element_pooling": true,
+    "texture_compression": true,
+    "audio_compression": true
+  },
+  
+  "quality_settings": {
+    "max_texture_resolution_pc": 2048,
+    "max_texture_resolution_quest": 1024,
+    "use_mipmaps": true,
+    "enable_light_baking": true,
+    "max_light_count": 8,
+    "shadow_quality_pc": "Hard",
+    "shadow_quality_quest": "Soft"
+  },
+  
+  "ui_performance": {
+    "ui_update_interval": 0.1,
+    "card_animation_duration": 0.3,
+    "enable_ui_animations": true,
+    "max_visible_cards": 3,
+    "ui_canvas_pixel_perfect": true
+  },
+  
+  "debug_settings": {
+    "enable_performance_logging": false,
+    "show_frame_time_ui": false,
+    "performance_log_interval": 5.0,
+    "show_calculation_budget": false,
+    "enable_profiler_markers": true,
+    "log_network_events": false
+  },
+  
+  "platform_specific": {
+    "pc": {
+      "world_size_limit_mb": 200,
+      "audio_quality": "High",
+      "texture_quality": "High",
+      "particle_systems": true,
+      "post_processing": true
+    },
+    "quest": {
+      "world_size_limit_mb": 100,
+      "audio_quality": "Medium", 
+      "texture_quality": "Medium",
+      "particle_systems": false,
+      "post_processing": false
+    }
+  },
+  
+  "adaptive_performance": {
+    "enable_adaptive_quality": true,
+    "fps_threshold_for_downgrade": 50,
+    "fps_threshold_for_upgrade": 65,
+    "quality_adjustment_interval": 3.0,
+    "max_quality_downgrades": 2
+  },
+  
+  "world_limits": {
+    "max_concurrent_users": 30,
+    "max_session_rooms": 3,
+    "max_simultaneous_calculations": 5,
+    "profile_data_retention_minutes": 30,
+    "session_timeout_minutes": 15
+  },
+  
+  "safety_thresholds": {
+    "max_memory_usage_mb": 150,
+    "max_cpu_time_per_frame_ms": 8.0,
+    "emergency_performance_mode_fps": 30,
+    "auto_quality_reduction": true,
+    "crash_prevention": true
+  }
+}

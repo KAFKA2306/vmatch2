@@ -1,0 +1,14 @@
+*.log
+*cache*
+claude-desktop-debian/
+unity-mcp/
+*.asset
+*.meta
+*.Identifier
+Temp/
+*.dll
+*.pdb
+*.lock
+*.png
+*.PNG
+Library/*
