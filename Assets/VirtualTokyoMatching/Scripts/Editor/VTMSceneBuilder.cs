@@ -16,6 +16,35 @@ namespace VirtualTokyoMatching.Editor
     /// </summary>
     public class VTMSceneBuilder
     {
+        // ─────────────────────────────────────────────────────────────
+        // 必須タグを自動で作成するユーティリティ
+        // ─────────────────────────────────────────────────────────────
+        private static readonly string[] RequiredTags =
+            { "RoomFloor", "SpawnMarker", "Floor", "Wall", "Furniture" };
+
+        private static void EnsureTagsExist()
+        {
+            var tagManager =
+                new SerializedObject(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset")[0]);
+            var tagsProp = tagManager.FindProperty("tags");
+
+            foreach (string tag in RequiredTags)
+            {
+                bool exists = false;
+                for (int i = 0; i < tagsProp.arraySize; i++)
+                    if (tagsProp.GetArrayElementAtIndex(i).stringValue == tag) { exists = true; break; }
+
+                if (!exists)
+                {
+                    int index = tagsProp.arraySize;
+                    tagsProp.InsertArrayElementAtIndex(index);
+                    tagsProp.GetArrayElementAtIndex(index).stringValue = tag;
+                    Debug.Log($"[VTM Builder] Added missing tag: {tag}");
+                }
+            }
+            tagManager.ApplyModifiedProperties();
+        }
+        
         private const string SCENE_PATH = "Assets/VirtualTokyoMatching/Scenes/VirtualTokyoMatching.unity";
         private const string MATERIALS_PATH = "Assets/VirtualTokyoMatching/Materials";
         private const string PREFABS_PATH = "Assets/VirtualTokyoMatching/Prefabs";
@@ -23,6 +52,7 @@ namespace VirtualTokyoMatching.Editor
         [MenuItem("VTM/Create Complete World")]
         public static void CreateCompleteWorld()
         {
+            EnsureTagsExist();                     // ← ここを追加
             Debug.Log("[VTM Builder] Starting headless world creation...");
             
             // Validate environment before proceeding
@@ -544,8 +574,10 @@ namespace VirtualTokyoMatching.Editor
 
         static void CreateMainLobbyCanvas(Transform parent)
         {
-            GameObject canvasGO = new GameObject("MainLobbyCanvas");
-            canvasGO.transform.SetParent(parent);
+            // 既にシーンに存在すれば再利用
+            GameObject canvasGO = GameObject.Find("MainLobbyCanvas");
+            if (canvasGO == null) canvasGO = new GameObject("MainLobbyCanvas");
+            canvasGO.transform.SetParent(parent, false);
             
             // --- FIXED: World Space positioning instead of Screen Space Overlay ---
             
@@ -933,6 +965,8 @@ namespace VirtualTokyoMatching.Editor
             
             try
             {
+                // Ensure all required tags exist first
+                EnsureTagsExist();
                 ApplyStableFloorMaterials();
                 AssetDatabase.SaveAssets();
                 AssetDatabase.Refresh();
@@ -1211,6 +1245,8 @@ namespace VirtualTokyoMatching.Editor
             
             try
             {
+                // Ensure all required tags exist first
+                EnsureTagsExist();
                 // Fix UI canvases to World Space
                 FixCanvasToWorldSpace();
                 
@@ -1235,6 +1271,8 @@ namespace VirtualTokyoMatching.Editor
             
             try
             {
+                // Ensure all required tags exist first
+                EnsureTagsExist();
                 SetEnvironmentStatic();
                 ConfigureRenderingSettings();
                 OptimizeLightingSettings();
