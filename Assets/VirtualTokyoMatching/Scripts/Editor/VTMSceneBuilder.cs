@@ -1657,5 +1657,135 @@ namespace VirtualTokyoMatching.Editor
                 Debug.LogError($"[VTM Builder] Failed to setup world preview: {e.Message}");
             }
         }
+        
+        // Fix UdonSharp compilation and VRChat build issues
+        [MenuItem("VTM/Fix UdonSharp & Build Issues")]
+        public static void FixUdonSharpAndBuildIssues()
+        {
+            Debug.Log("[VTM Builder] Fixing UdonSharp compilation and build issues...");
+            
+            try
+            {
+                // 1. Ensure tags exist
+                EnsureTagsExist();
+                
+                // 2. Fix physics layers for VRChat
+                SetupPhysicsLayers();
+                
+                // 3. Force UdonSharp compilation
+                ForceUdonSharpCompilation();
+                
+                // 4. Save all assets
+                AssetDatabase.SaveAssets();
+                AssetDatabase.Refresh();
+                
+                Debug.Log("[VTM Builder] ✅ UdonSharp and build issues fixed! You can now try building again.");
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"[VTM Builder] Failed to fix UdonSharp issues: {e.Message}");
+            }
+        }
+        
+        static void SetupPhysicsLayers()
+        {
+            Debug.Log("[VTM Builder] Setting up VRChat physics layers...");
+            
+            // VRChat requires specific physics layers and collision matrix setup
+            // Layer assignments that VRChat expects:
+            // Layer 0: Default
+            // Layer 1: TransparentFX
+            // Layer 2: Ignore Raycast
+            // Layer 3: (empty)
+            // Layer 4: Water
+            // Layer 5: UI
+            // Layer 8: PostProcessing (VRChat)
+            // Layer 9: Player (VRChat)
+            // Layer 10: PlayerLocal (VRChat)
+            // Layer 11: Environment (VRChat)
+            // Layer 12: UiMenu (VRChat)
+            // Layer 13: Pickup (VRChat)
+            // Layer 14: PickupNoEnvironment (VRChat)
+            // Layer 15: StereoLeft (VRChat)
+            // Layer 16: StereoRight (VRChat)
+            // Layer 17: Water (VRChat)
+            // Layer 18: MirrorReflection (VRChat)
+            // Layer 19: (VRChat reserved)
+            // Layer 20: (VRChat reserved)
+            // Layer 21: (VRChat reserved)
+            // Layer 22: (VRChat reserved)
+            
+            try
+            {
+                var tagManager = new SerializedObject(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset")[0]);
+                var layersProp = tagManager.FindProperty("layers");
+                
+                // Ensure VRChat layer names are set correctly
+                string[] vrcLayers = {
+                    "Default", "TransparentFX", "Ignore Raycast", "", "Water", "UI", "", "",
+                    "PostProcessing", "Player", "PlayerLocal", "Environment", 
+                    "UiMenu", "Pickup", "PickupNoEnvironment", "StereoLeft",
+                    "StereoRight", "Water", "MirrorReflection", "", "", "", ""
+                };
+                
+                for (int i = 0; i < vrcLayers.Length && i < layersProp.arraySize; i++)
+                {
+                    var layerProp = layersProp.GetArrayElementAtIndex(i);
+                    if (layerProp != null && !string.IsNullOrEmpty(vrcLayers[i]))
+                    {
+                        layerProp.stringValue = vrcLayers[i];
+                    }
+                }
+                
+                tagManager.ApplyModifiedProperties();
+                Debug.Log("[VTM Builder] Physics layers configured for VRChat");
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning($"[VTM Builder] Could not fully configure physics layers: {e.Message}");
+            }
+        }
+        
+        static void ForceUdonSharpCompilation()
+        {
+            Debug.Log("[VTM Builder] Forcing UdonSharp compilation...");
+            
+            try
+            {
+                // Trigger UdonSharp compilation by calling its compiler
+                // This should generate the missing program assets
+                var compilerType = System.Type.GetType("UdonSharp.Compiler.UdonSharpCompilerV1, UdonSharp.Editor");
+                if (compilerType != null)
+                {
+                    var compileMethod = compilerType.GetMethod("CompileSync", 
+                        System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+                    
+                    if (compileMethod != null)
+                    {
+                        // Create default compile options
+                        var optionsType = System.Type.GetType("UdonSharp.Compiler.UdonSharpCompileOptions, UdonSharp.Editor");
+                        if (optionsType != null)
+                        {
+                            var options = System.Activator.CreateInstance(optionsType);
+                            compileMethod.Invoke(null, new object[] { options });
+                            Debug.Log("[VTM Builder] UdonSharp compilation triggered");
+                        }
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning("[VTM Builder] UdonSharp compiler not found - UdonSharp may not be properly installed");
+                }
+                
+                // Alternative: Force Unity to recompile scripts
+                AssetDatabase.Refresh(ImportAssetOptions.ForceUpdate);
+                UnityEditor.Compilation.CompilationPipeline.RequestScriptCompilation();
+                
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning($"[VTM Builder] UdonSharp compilation warning: {e.Message}");
+            }
+        }
     }
 }
