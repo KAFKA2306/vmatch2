@@ -36,8 +36,9 @@ namespace VirtualTokyoMatching
         private int[] questionResponses = new int[112];
         private bool[] responseChanged = new bool[112];
 
-        // Performance tracking
+        // Performance / correctness tracking
         private const float MIN_UPDATE_INTERVAL = 0.1f; // Minimum seconds between updates
+        private const float VECTOR_STATE_TOLERANCE = 0.0001f;
 
         void Start()
         {
@@ -67,34 +68,13 @@ namespace VirtualTokyoMatching
         {
             if (playerDataManager == null) return;
 
-            // Load existing responses and rebuild vector
+            // Responses + vector configuration are the canonical state. The persisted
+            // 30D vector is normalized output and must never become the raw accumulator.
             questionResponses = playerDataManager.GetAllQuestionResponses();
-            var savedVector = playerDataManager.GetVector30D();
+            RebuildVectorFromResponses();
+            isProvisional = !playerDataManager.IsAssessmentComplete();
 
-            // If we have a saved vector, use it
-            bool hasSavedVector = false;
-            for (int i = 0; i < 30; i++)
-            {
-                if (Mathf.Abs(savedVector[i]) > 0.001f)
-                {
-                    hasSavedVector = true;
-                    break;
-                }
-            }
-
-            if (hasSavedVector)
-            {
-                Array.Copy(savedVector, normalizedVector, 30);
-                Array.Copy(savedVector, workingVector, 30);
-                isProvisional = !playerDataManager.IsAssessmentComplete();
-            }
-            else
-            {
-                // Rebuild from responses
-                RebuildVectorFromResponses();
-            }
-
-            Debug.Log($"[VectorBuilder] Loaded vector, provisional: {isProvisional}");
+            Debug.Log($"[VectorBuilder] Loaded responses and rebuilt raw vector, provisional: {isProvisional}");
         }
 
         /// <summary>
@@ -111,6 +91,12 @@ namespace VirtualTokyoMatching
                 return;
 
             int oldResponse = questionResponses[questionIndex];
+            if (oldResponse == response)
+            {
+                // Re-applying the same answer is intentionally idempotent.
+                return;
+            }
+
             questionResponses[questionIndex] = response;
             responseChanged[questionIndex] = true;
 
@@ -118,6 +104,15 @@ namespace VirtualTokyoMatching
 
             // Update provisional normalized vector
             UpdateProvisionalNormalization();
+
+            // Incremental arithmetic must remain equivalent to a canonical rebuild.
+            // If floating-point drift or invalid state is detected, repair from responses
+            // before notifying publication consumers.
+            if (!IsVectorStateConsistent())
+            {
+                Debug.LogWarning("[VectorBuilder] Incremental vector drift detected; rebuilding from responses");
+                RebuildVectorFromResponses();
+            }
 
             lastUpdateTime = currentTime;
             SendEventToTargets(onVectorUpdatedTargets, onVectorUpdatedEvent);
@@ -156,41 +151,72 @@ namespace VirtualTokyoMatching
         }
 
         /// <summary>
+        /// Build the raw 30D accumulator from the canonical responses.
+        /// </summary>
+        private bool TryBuildWorkingVectorFromResponses(float[] target)
+        {
+            if (!isInitialized || vectorConfig == null || questionDatabase == null ||
+                questionDatabase.questions == null || target == null || target.Length != 30)
+                return false;
+
+            for (int axis = 0; axis < 30; axis++)
+            {
+                target[axis] = 0f;
+            }
+
+            for (int questionIndex = 0; questionIndex < 112; questionIndex++)
+            {
+                int response = questionResponses[questionIndex];
+                if (response <= 0 || response > 5) continue;
+
+                if (questionIndex >= questionDatabase.questions.Length) return false;
+                var question = questionDatabase.questions[questionIndex];
+                if (question == null || question.weights == null || question.weights.Length < response)
+                    return false;
+
+                float responseWeight = question.weights[response - 1];
+                for (int axis = 0; axis < 30; axis++)
+                {
+                    target[axis] += responseWeight * vectorConfig.GetWeight(questionIndex, axis);
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
         /// Rebuild entire vector from all responses (used for loading or recovery)
         /// </summary>
         public void RebuildVectorFromResponses()
         {
-            if (!isInitialized || vectorConfig == null || questionDatabase == null) return;
-
-            // Clear working vector
-            for (int i = 0; i < workingVector.Length; i++)
+            if (!TryBuildWorkingVectorFromResponses(workingVector))
             {
-                workingVector[i] = 0f;
-            }
-
-            // Process all responses
-            for (int questionIndex = 0; questionIndex < 112; questionIndex++)
-            {
-                int response = questionResponses[questionIndex];
-                if (response > 0 && response <= 5)
-                {
-                    var question = questionDatabase.questions[questionIndex];
-                    if (question != null)
-                    {
-                        float responseWeight = question.weights[response - 1];
-                        for (int axis = 0; axis < 30; axis++)
-                        {
-                            float configWeight = vectorConfig.GetWeight(questionIndex, axis);
-                            workingVector[axis] += responseWeight * configWeight;
-                        }
-                    }
-                }
+                Debug.LogError("[VectorBuilder] Cannot rebuild vector from canonical responses/configuration");
+                return;
             }
 
             // Update provisional normalization
             UpdateProvisionalNormalization();
 
             Debug.Log("[VectorBuilder] Rebuilt vector from responses");
+        }
+
+        /// <summary>
+        /// Verify that the incremental raw accumulator still equals a fresh rebuild.
+        /// Publication/finalization paths use this as a fail-closed gate.
+        /// </summary>
+        public bool IsVectorStateConsistent()
+        {
+            var expectedWorkingVector = new float[30];
+            if (!TryBuildWorkingVectorFromResponses(expectedWorkingVector)) return false;
+
+            for (int axis = 0; axis < 30; axis++)
+            {
+                if (Mathf.Abs(expectedWorkingVector[axis] - workingVector[axis]) > VECTOR_STATE_TOLERANCE)
+                    return false;
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -269,6 +295,12 @@ namespace VirtualTokyoMatching
                 return;
             }
 
+            if (!IsVectorStateConsistent())
+            {
+                Debug.LogError("[VectorBuilder] Refusing to finalize an inconsistent vector state");
+                return;
+            }
+
             // Perform final normalization without scaling
             float magnitude = 0f;
             for (int i = 0; i < 30; i++)
@@ -300,10 +332,17 @@ namespace VirtualTokyoMatching
         }
 
         /// <summary>
-        /// Get current normalized vector
+        /// Get current normalized vector. Return null instead of exposing an
+        /// inconsistent result to PublicProfilePublisher or other consumers.
         /// </summary>
         public float[] GetNormalizedVector()
         {
+            if (!IsVectorStateConsistent())
+            {
+                Debug.LogError("[VectorBuilder] Refusing to expose an inconsistent normalized vector");
+                return null;
+            }
+
             var copy = new float[30];
             Array.Copy(normalizedVector, copy, 30);
             return copy;
